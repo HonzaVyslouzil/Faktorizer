@@ -1,0 +1,107 @@
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Tento program jsem dostal jako zadání pro pozici java software engineer
+ * a přesto že práce nakonec upřednostnili jiného uchazeče, jako feedback jsem
+ * dostal že je správně podle zadání.
+ *
+ * Tento program vypíše faktorialy čísel v daném formátu z inputovaného souboru
+ *
+ * Soubor bude jako příklad obsahovat "10,5.24 7"
+ * (jakmile program narazí na znak co není číslo pokračuje dál)
+ * a vypíše následující:
+ * 10! = 3628800
+ * 5! = 120
+ * 24! = 620448401733239439360000
+ * 7! = 5040
+ */
+class Faktorizer {
+
+    /**
+     * Třída která zjistí zda se jedná opravdu o číslo
+     *
+     * @param input
+     * @return
+     */
+    public static boolean isItReallyNumber(int input) {
+        // output variable
+        if (input >= '0' && input <= '9'){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * "Iterační znásobovač".
+     * @param n input number
+     * @return output number
+     */
+    public static BigInteger multiplyIt(int n) {
+        if (n < 0) {
+            throw new IllegalArgumentException("Ze záporného čísla nelze vypočítat faktoriál");
+        }
+        BigInteger iter = BigInteger.ONE;
+        for (int i = 2; i <= n; i++) {
+            iter = iter.multiply(BigInteger.valueOf(i));
+        }
+        return iter;
+    }
+    /**
+     * Přečte čísla ze souboru a vypíše jejich faktorialy.
+     * @param fileName file to be processed
+     * @throws IOException
+     */
+    protected static void processInput(String fileName) throws IOException {
+        try (FileInputStream vstup = new FileInputStream(fileName)) {
+            int number;
+            StringBuilder numberBuilder = new StringBuilder();
+
+            while (( number = vstup.read()) != -1) {
+                if (isItReallyNumber((char) number)) {
+                    numberBuilder.append((char) number);
+                } else {
+                    if (numberBuilder.length() > 0) {
+                        int actualNumber = Integer.parseInt(numberBuilder.toString());
+                        try {
+                            System.out.println(actualNumber + "! = " + multiplyIt(actualNumber));
+                        } catch (IllegalArgumentException e){
+                            System.out.println(e.getMessage());
+                        }
+                        numberBuilder.setLength(0);  // reset the builder for the next number
+                    }
+                }
+            }
+            // handle the last number in the file if there's any
+            if (numberBuilder.length() > 0) {
+                int actualNumber = Integer.parseInt(numberBuilder.toString());
+                try {
+                    System.out.println(actualNumber +"! = " + multiplyIt(actualNumber));
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
+    }
+    /**
+     * Main class, která se volá z command line. Jako jediný parametr očekává soubor
+     * ve kterém jsou čísla odděleny znakem který není číslo.
+     * @param args
+     * @return int zero, when everything goes well, otherwise one
+     */
+    public static void main(String[] args) {
+        if (args.length < 1){
+            return;
+        }
+        String s = args[0];
+        try {
+            processInput(s);
+        } catch (IOException ex) {
+            Logger.getLogger(Faktorizer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}
